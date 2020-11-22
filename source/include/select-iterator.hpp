@@ -26,6 +26,10 @@
 #  endif
 #endif
 
+#if __cpp_impl_three_way_comparison >= 201907L
+#  include <compare>
+#endif
+
 #include <cstddef>
 #include <type_traits>
 #include <utility>
@@ -93,8 +97,8 @@ namespace gch
     
     using tuple_ptr  = typename std::iterator_traits<TupleIter>::pointer;
     
-    static constexpr bool
-    is_const = std::is_const<typename std::remove_pointer<tuple_ptr>::type>::value;
+    static constexpr bool is_const = std::is_const<
+      typename std::remove_pointer<tuple_ptr>::type>::value;
   
     using difference_type = typename std::iterator_traits<TupleIter>::difference_type;
     using value_type = Value;
@@ -203,7 +207,69 @@ namespace gch
   };
 
 #if __cpp_lib_three_way_comparison >= 201907L
+  
+  // SAME ITER
+  
+  template <std::size_t Index, typename Value, typename TupleIter>
+  requires requires (TupleIter lhs, TupleIter rhs) { { lhs == rhs } -> std::convertible_to<bool>; }
+  constexpr bool operator== (const select_iterator<Index, Value, TupleIter>& lhs,
+                             const select_iterator<Index, Value, TupleIter>& rhs)
+    noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
+  {
+    return lhs.base () == rhs.base ();
+  }
 
+  template <std::size_t Index, typename Value, typename TupleIter>
+  constexpr auto
+  operator<=> (const select_iterator<Index, Value, TupleIter>& lhs,
+               const select_iterator<Index, Value, TupleIter>& rhs)
+    noexcept (noexcept (std::declval<TupleIter> () <=> std::declval<TupleIter> ()))
+  {
+    return lhs.base () <=> rhs.base ();
+  }
+  
+  // BASE ITER LEFT
+  
+  template <std::size_t Index, typename Value, typename TupleIter>
+  requires requires (TupleIter lhs, TupleIter rhs)
+  { { lhs == rhs } -> std::convertible_to<bool>; }
+  constexpr bool operator== (const TupleIter& lhs,
+                             const select_iterator<Index, Value, TupleIter>& rhs)
+    noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
+  {
+    return lhs == rhs.base ();
+  }
+  
+  template <std::size_t Index, typename Value, typename TupleIter>
+  constexpr auto
+  operator<=> (const TupleIter& lhs,
+               const select_iterator<Index, Value, TupleIter>& rhs)
+    noexcept (noexcept (std::declval<TupleIter> () <=> std::declval<TupleIter> ()))
+  {
+    return lhs <=> rhs.base ();
+  }
+  
+  // BASE ITER RIGHT
+  
+  template <std::size_t Index, typename Value, typename TupleIter>
+  requires requires (TupleIter lhs, TupleIter rhs)
+  { { lhs == rhs } -> std::convertible_to<bool>; }
+  constexpr bool operator== (const select_iterator<Index, Value, TupleIter>& lhs,
+                             const TupleIter& rhs)
+    noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
+  {
+    return lhs.base () == rhs;
+  }
+  
+  template <std::size_t Index, typename Value, typename TupleIter>
+  constexpr auto
+  operator<=> (const select_iterator<Index, Value, TupleIter>& lhs,
+               const TupleIter& rhs)
+    noexcept (noexcept (std::declval<TupleIter> () <=> std::declval<TupleIter> ()))
+  {
+    return lhs.base () <=> rhs;
+  }
+  
 #else
   
   // SAME ITER
@@ -212,7 +278,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator< (const select_iterator<Index, Value, TupleIter>& lhs,
                             const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () < std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () < std::declval<TupleIter> ()))
   {
     return lhs.base () < rhs.base ();
   }
@@ -221,7 +287,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator> (const select_iterator<Index, Value, TupleIter>& lhs,
                             const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () > std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () > std::declval<TupleIter> ()))
   {
     return lhs.base () > rhs.base ();
   }
@@ -230,7 +296,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator<= (const select_iterator<Index, Value, TupleIter>& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () <= std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () <= std::declval<TupleIter> ()))
   {
     return lhs.base () <= rhs.base ();
   }
@@ -239,7 +305,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator>= (const select_iterator<Index, Value, TupleIter>& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () >= std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () >= std::declval<TupleIter> ()))
   {
     return lhs.base () >= rhs.base ();
   }
@@ -248,7 +314,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator== (const select_iterator<Index, Value, TupleIter>& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
   {
     return lhs.base () == rhs.base ();
   }
@@ -257,7 +323,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator!= (const select_iterator<Index, Value, TupleIter>& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () != std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () != std::declval<TupleIter> ()))
   {
     return lhs.base () != rhs.base ();
   }
@@ -268,7 +334,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator< (const TupleIter& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () < std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () < std::declval<TupleIter> ()))
   {
     return lhs < rhs.base ();
   }
@@ -277,7 +343,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator> (const TupleIter& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () > std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () > std::declval<TupleIter> ()))
   {
     return lhs > rhs.base ();
   }
@@ -286,7 +352,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator<= (const TupleIter& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () <= std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () <= std::declval<TupleIter> ()))
   {
     return lhs <= rhs.base ();
   }
@@ -295,7 +361,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator>= (const TupleIter& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () >= std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () >= std::declval<TupleIter> ()))
   {
     return lhs >= rhs.base ();
   }
@@ -304,7 +370,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator== (const TupleIter& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
   {
     return lhs == rhs.base ();
   }
@@ -313,7 +379,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator!= (const TupleIter& lhs,
                              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () != std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () != std::declval<TupleIter> ()))
   {
     return lhs != rhs.base ();
   }
@@ -324,7 +390,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator< (const select_iterator<Index, Value, TupleIter>& lhs,
                             const TupleIter& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () < std::declval<TupleIter> ()))
+   noexcept (noexcept (std::declval<TupleIter> () < std::declval<TupleIter> ()))
   {
     return lhs.base () < rhs;
   }
@@ -333,7 +399,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator> (const select_iterator<Index, Value, TupleIter>& lhs,
                             const TupleIter& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () > std::declval<TupleIter> ()))
+   noexcept (noexcept (std::declval<TupleIter> () > std::declval<TupleIter> ()))
   {
     return lhs.base () > rhs;
   }
@@ -342,7 +408,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator<= (const select_iterator<Index, Value, TupleIter>& lhs,
                             const TupleIter& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () <= std::declval<TupleIter> ()))
+   noexcept (noexcept (std::declval<TupleIter> () <= std::declval<TupleIter> ()))
   {
     return lhs.base () <= rhs;
   }
@@ -351,7 +417,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator>= (const select_iterator<Index, Value, TupleIter>& lhs,
                             const TupleIter& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () >= std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () >= std::declval<TupleIter> ()))
   {
     return lhs.base () >= rhs;
   }
@@ -360,7 +426,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator== (const select_iterator<Index, Value, TupleIter>& lhs,
                             const TupleIter& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
+   noexcept (noexcept (std::declval<TupleIter> () == std::declval<TupleIter> ()))
   {
     return lhs.base () == rhs;
   }
@@ -369,7 +435,7 @@ namespace gch
   GCH_NODISCARD
   constexpr bool operator!= (const select_iterator<Index, Value, TupleIter>& lhs,
                             const TupleIter& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () != std::declval<TupleIter> ()))
+    noexcept (noexcept (std::declval<TupleIter> () != std::declval<TupleIter> ()))
   {
     return lhs.base () != rhs;
   }
@@ -392,8 +458,8 @@ namespace gch
   constexpr auto
   operator- (const TupleIter& lhs,
              const select_iterator<Index, Value, TupleIter>& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () - std::declval<TupleIter> ()))
-  -> decltype (lhs - rhs.base ())
+    noexcept (noexcept (std::declval<TupleIter> () - std::declval<TupleIter> ()))
+    -> decltype (lhs - rhs.base ())
   {
     return lhs - rhs.base ();
   }
@@ -403,8 +469,8 @@ namespace gch
   constexpr auto
   operator- (const select_iterator<Index, Value, TupleIter>& lhs,
              const TupleIter& rhs)
-  noexcept (noexcept (std::declval<TupleIter> () - std::declval<TupleIter> ()))
-  -> decltype (lhs.base () - rhs)
+    noexcept (noexcept (std::declval<TupleIter> () - std::declval<TupleIter> ()))
+    -> decltype (lhs.base () - rhs)
   {
     return lhs.base () - rhs;
   }
@@ -414,7 +480,7 @@ namespace gch
   constexpr select_iterator<Index, Value, TupleIter>
   operator+ (typename select_iterator<Index, Value, TupleIter>::difference_type n,
              const select_iterator<Index, Value, TupleIter>& it)
-  noexcept (noexcept (select_iterator<Index, Value, TupleIter>(n + std::declval<TupleIter> ())))
+    noexcept (noexcept (select_iterator<Index, Value, TupleIter>(n + std::declval<TupleIter> ())))
   {
     return select_iterator<Index, Value, TupleIter> (n + it.base ());
   }

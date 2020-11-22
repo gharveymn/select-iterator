@@ -45,6 +45,7 @@ int main()
   myclass z { 3 };
   
   std::vector<std::tuple<int, std::string, bool, myclass>> v {{ 5, "hi0", true, x }, { 6, "hi1", false, y }, { 7, "hi2", true, z }};
+  using iter = decltype (v)::iterator;
   
   print_v<0> (v);
   print_v<1> (v);
@@ -76,33 +77,47 @@ int main()
   print_v<std::string> (vp);
   print_v<std::size_t> (vp);
   
-  const auto it1 = make_select_iterator<0> (v.begin ());
-  const auto it2 = make_select_iterator<0> (v.end ());
+  const auto sit1 = make_select_iterator<0> (v.begin ());
+  const auto sit2 = make_select_iterator<0> (v.end ());  
   
-  assert (  (it1 <  it2));
-  assert (! (it1 >  it2));
-  assert (  (it1 <= it2));
-  assert (! (it1 >= it2));
-  assert (! (it1 == it2));
-  assert (  (it1 != it2));
+  assert (  (sit1 <  sit2));
+  assert (! (sit1 >  sit2));
+  assert (  (sit1 <= sit2));
+  assert (! (sit1 >= sit2));
+  assert (! (sit1 == sit2));
+  assert (  (sit1 != sit2));
   
-  assert (it1 + 3 == it2);
-  assert (3 + it1 == it2);
-  assert (it2 - 3 == it1);
-  assert (it2 - it1 == 3);
-  assert (it1[2] == *(it2 - 1));
+  assert (  (sit1 <  v.end ()));
+  assert (! (sit1 >  v.end ()));
+  assert (  (sit1 <= v.end ()));
+  assert (! (sit1 >= v.end ()));
+  assert (! (sit1 == v.end ()));
+  assert (  (sit1 != v.end ()));
   
-  auto mit1 = it1 + 1;
-  assert (--mit1 == it1);
-  assert (mit1++ == it1);
-  assert (mit1 != it1);
-  assert ((mit1 -= 1) == it1);
+  assert (  (v.begin () <  sit2));
+  assert (! (v.begin () >  sit2));
+  assert (  (v.begin () <= sit2));
+  assert (! (v.begin () >= sit2));
+  assert (! (v.begin () == sit2));
+  assert (  (v.begin () != sit2));
   
-  auto mit2 = it2 - 1;
-  assert (++mit2 == it2);
-  assert (mit2-- == it2);
-  assert (mit2 != it2);
-  assert ((mit2 += 1) == it2);
+  assert (sit1 + 3 == sit2);
+  assert (3 + sit1 == sit2);
+  assert (sit2 - 3 == sit1);
+  assert (sit2 - sit1 == 3);
+  assert (sit1[2] == *(sit2 - 1));
+  
+  auto mit1 = sit1 + 1;
+  assert (--mit1 == sit1);
+  assert (mit1++ == sit1);
+  assert (mit1 != sit1);
+  assert ((mit1 -= 1) == sit1);
+  
+  auto mit2 = sit2 - 1;
+  assert (++mit2 == sit2);
+  assert (mit2-- == sit2);
+  assert (mit2 != sit2);
+  assert ((mit2 += 1) == sit2);
   
   return 0;
 }
