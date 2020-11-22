@@ -44,9 +44,7 @@ int main()
   myclass y { 2 };
   myclass z { 3 };
   
-  std::vector<std::tuple<int, std::string, bool, myclass>> v {{ 5, "hi0", true, x },
-                                                              { 6, "hi1", false, y },
-                                                              { 7, "hi2", true, z }};
+  std::vector<std::tuple<int, std::string, bool, myclass>> v {{ 5, "hi0", true, x }, { 6, "hi1", false, y }, { 7, "hi2", true, z }};
   
   print_v<0> (v);
   print_v<1> (v);
@@ -71,9 +69,7 @@ int main()
   
   std::cout << std::endl;
   
-  std::vector<std::pair<std::string, std::size_t>> vp {{ "hi11", 15},
-                                                       { "hi12", 16},
-                                                       { "hi13", 17}};
+  std::vector<std::pair<std::string, std::size_t>> vp {{ "hi11", 15}, { "hi12", 16}, { "hi13", 17}};
   print_v<0> (vp);
   print_v<1> (vp);
   
