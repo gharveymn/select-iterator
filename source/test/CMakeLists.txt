@@ -4,7 +4,7 @@ ADD_EXECUTABLE(test_select-iterator main.cpp)
 TARGET_LINK_LIBRARIES(test_select-iterator select-iterator)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  TARGET_COMPILE_OPTIONS(test_select-iterator PUBLIC "-stdlib=libc++")
+  TARGET_COMPILE_OPTIONS(test_select-iterator PUBLIC "-stdlib=libc++" "-ftime-trace")
   TARGET_LINK_OPTIONS(test_select-iterator PUBLIC "-Wl,--allow-multiple-definition")
   TARGET_LINK_LIBRARIES(test_select-iterator -lc++ -lc++abi)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
