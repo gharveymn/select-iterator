@@ -504,7 +504,7 @@ namespace gch
   template <std::size_t Index, typename TupleIter>
   constexpr
   auto selecting (TupleIter&& it)
-       -> decltype (make_select_iterator<Index> (std::forward<TupleIter> (it)))
+    -> decltype (make_select_iterator<Index> (std::forward<TupleIter> (it)))
   {
     return make_select_iterator<Index> (std::forward<TupleIter> (it));
   }
