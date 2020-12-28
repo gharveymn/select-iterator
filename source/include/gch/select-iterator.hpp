@@ -26,10 +26,31 @@
 #  endif
 #endif
 
-#if __cpp_impl_three_way_comparison && __has_include(<compare>)
-#  include <compare>
-#  if __cpp_lib_three_way_comparison >= 201907L && ! defined(GCH_THREE_WAY_COMPARISON)
-#    define GCH_THREE_WAY_COMPARISON
+#if __cpp_impl_three_way_comparison >= 201907L
+#  ifndef GCH_IMPL_THREE_WAY_COMPARISON
+#    define GCH_IMPL_THREE_WAY_COMPARISON
+#  endif
+#  if __has_include(<compare>)
+#    include <compare>
+#    if __cpp_lib_three_way_comparison >= 201907L
+#      ifndef GCH_LIB_THREE_WAY_COMPARISON
+#        define GCH_LIB_THREE_WAY_COMPARISON
+#      endif
+#    endif
+#  endif
+#endif
+
+#if __cpp_concepts >= 201907L
+#  ifndef GCH_CONCEPTS
+#    define GCH_CONCEPTS
+#  endif
+#  if __has_include(<concepts>)
+#    include <concepts>
+#    if __cpp_lib_concepts >= 202002L
+#      ifndef GCH_LIB_CONCEPTS
+#        define GCH_LIB_CONCEPTS
+#      endif
+#    endif
 #  endif
 #endif
 
@@ -206,12 +227,14 @@ namespace gch
     TupleIter m_iter;
   };
 
-#ifdef GCH_THREE_WAY_COMPARISON
+#ifdef GCH_LIB_THREE_WAY_COMPARISON
   
   // SAME ITER
   
   template <std::size_t Index, typename Value, typename TupleIter>
+#ifdef GCH_LIB_CONCEPTS
   requires requires (TupleIter lhs, TupleIter rhs) { { lhs == rhs } -> std::convertible_to<bool>; }
+#endif
   GCH_NODISCARD constexpr
   bool operator== (const select_iterator<Index, Value, TupleIter>& lhs,
                    const select_iterator<Index, Value, TupleIter>& rhs)
@@ -232,7 +255,9 @@ namespace gch
   // BASE ITER LEFT
   
   template <std::size_t Index, typename Value, typename TupleIter>
+#ifdef GCH_LIB_CONCEPTS
   requires requires (TupleIter lhs, TupleIter rhs) { { lhs == rhs } -> std::convertible_to<bool>; }
+#endif
   GCH_NODISCARD constexpr
   bool operator== (const TupleIter& lhs, const select_iterator<Index, Value, TupleIter>& rhs)
     noexcept (noexcept (lhs == rhs.base ()))
@@ -251,7 +276,9 @@ namespace gch
   // BASE ITER RIGHT
   
   template <std::size_t Index, typename Value, typename TupleIter>
+#ifdef GCH_LIB_CONCEPTS
   requires requires (TupleIter lhs, TupleIter rhs) { { lhs == rhs } -> std::convertible_to<bool>; }
+#endif
   GCH_NODISCARD constexpr
   bool operator== (const select_iterator<Index, Value, TupleIter>& lhs, const TupleIter& rhs)
     noexcept (noexcept (lhs.base () == rhs))
