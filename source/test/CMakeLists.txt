@@ -1,21 +1,38 @@
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-ADD_EXECUTABLE(test_select-iterator main.cpp)
-TARGET_LINK_LIBRARIES(test_select-iterator select-iterator)
+SET(TEST_NAME select-iterator)
+SET(SOURCE_FILES main.cpp)
+
+SET(TARGET_VERSIONS 11 14 17 20)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  TARGET_COMPILE_OPTIONS(test_select-iterator PUBLIC "-stdlib=libc++" "-ftime-trace")
-  TARGET_LINK_OPTIONS(test_select-iterator PUBLIC "-Wl,--allow-multiple-definition")
-  TARGET_LINK_LIBRARIES(test_select-iterator -lc++ -lc++abi)
+  SET(COMPILE_OPTS -stdlib=libc++ -ftime-trace --coverage -Wall -Wextra)
+  SET(LINK_OPTS -Wl,--allow-multiple-definition --coverage)
+  SET(LINK_LIBS c++ c++abi)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  # using Intel C++
+  SET(COMPILE_OPTS -Wall -Wextra)
+  SET(LINK_OPTS )
+  SET(LINK_LIBS )
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # using Visual Studio C++
+  SET(COMPILE_OPTS /W4)
+  SET(LINK_OPTS )
+  SET(LINK_LIBS )
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  SET(COMPILE_OPTS )
+  SET(LINK_OPTS )
+  SET(LINK_LIBS )
 endif()
 
-SET_TARGET_PROPERTIES(test_select-iterator PROPERTIES
-                      CXX_STANDARD          20
-                      CXX_STANDARD_REQUIRED NO
-                      CXX_EXTENSIONS        NO)
+FOREACH(version ${TARGET_VERSIONS})
+  SET(target_name test.${TEST_NAME}.c++${version})
+  ADD_EXECUTABLE(${target_name} ${SOURCE_FILES})
+
+  TARGET_COMPILE_OPTIONS(${target_name} PUBLIC ${COMPILE_OPTS})
+  TARGET_LINK_OPTIONS   (${target_name} PUBLIC ${LINK_OPTS})
+  TARGET_LINK_LIBRARIES (${target_name} ${PACKAGE_NAME} ${LINK_LIBS})
+
+  SET_TARGET_PROPERTIES(${target_name} PROPERTIES
+                        CXX_STANDARD          ${version}
+                        CXX_STANDARD_REQUIRED NO
+                        CXX_EXTENSIONS        NO)
+ENDFOREACH()
