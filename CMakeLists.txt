@@ -1,13 +1,39 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
-PROJECT(select-iterator
-        VERSION 0.0.1
-        LANGUAGES CXX)
+cmake_minimum_required (VERSION 3.15)
 
-# Options
-IF(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-  OPTION(SELECT_ITERATOR_BUILD_TESTS "Set to ON to build tests" ON)
-ELSE()
-  OPTION(SELECT_ITERATOR_BUILD_TESTS "Set to ON to build tests" OFF)
-ENDIF()
+project (
+  select-iterator
+  VERSION
+    0.0.2
+  LANGUAGES
+    CXX
+)
 
-ADD_SUBDIRECTORY(source)
+string (COMPARE EQUAL "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" _EXTRAS_DEFAULT)
+
+option (
+  GCH_SELECT_ITERATOR_BUILD_TESTS
+  "Set to ON to build tests for gch::select-iterator."
+  ${_EXTRAS_DEFAULT}
+)
+
+include (CMakeDependentOption)
+cmake_dependent_option (
+  GCH_USE_LIBCXX_WITH_CLANG
+  "Set to ON to use libc++ when compiling with Clang."
+  OFF
+  "CMAKE_CXX_COMPILER_ID MATCHES Clang"
+  OFF
+)
+
+if (GCH_SELECT_ITERATOR_BUILD_TESTS)
+  enable_testing ()
+endif ()
+
+add_subdirectory (source)
+
+export (
+  EXPORT
+    select-iterator-targets
+  NAMESPACE
+    gch::
+)

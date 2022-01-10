@@ -1,21 +1,70 @@
-IF(NOT CREATE_PACKAGE_VERSION VERSION_GREATER_EQUAL 0.0.4)
-  IF(NOT EXISTS "${PROJECT_SOURCE_DIR}/external/create-package/cmake/create-package.cmake")
-    MESSAGE(STATUS "Initializing create-package-0.0.4 in git submodule.")
-    EXECUTE_PROCESS(COMMAND git submodule --quiet update --init -- "${PROJECT_SOURCE_DIR}/external/create-package"
-                    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-  ENDIF()
-  INCLUDE("${PROJECT_SOURCE_DIR}/external/create-package/cmake/create-package.cmake")
-ENDIF()
+add_library (select-iterator INTERFACE)
 
-CREATE_PACKAGE(AUTHOR       gharveymn
-               NAMESPACE    gch
-               NAME         select-iterator
-               HEADERS      select-iterator.hpp)
+target_sources (
+  select-iterator
+  INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/gch/select-iterator.hpp>
+)
 
-# Only include tests if we are at the top level
-IF(SELECT_ITERATOR_BUILD_TESTS)
-  MESSAGE(STATUS "Testing is enabled.")
-  ADD_SUBDIRECTORY(test)
-ELSE()
-  MESSAGE(STATUS "Testing is disabled.")
-ENDIF()
+target_include_directories (
+  select-iterator
+  INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+)
+
+target_include_directories (
+  select-iterator
+  SYSTEM INTERFACE
+    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>
+)
+
+set_target_properties (
+  select-iterator
+  PROPERTIES
+  PUBLIC_HEADER
+    include/gch/select-iterator.hpp
+)
+
+add_library (gch::select-iterator ALIAS select-iterator)
+
+install (
+  TARGETS
+    select-iterator
+  EXPORT
+    select-iterator-targets
+  PUBLIC_HEADER
+    DESTINATION include/gch
+)
+
+file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/select-iterator-config.cmake [=[
+get_filename_component (PACKAGE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
+include ("${CMAKE_CURRENT_LIST_DIR}/select-iterator-targets.cmake")
+]=])
+
+include (CMakePackageConfigHelpers)
+write_basic_package_version_file (
+  select-iterator-version.cmake
+  COMPATIBILITY
+    SameMinorVersion
+)
+
+install (
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/select-iterator-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/select-iterator-version.cmake
+  DESTINATION
+    lib/cmake/select-iterator
+)
+
+install (
+  EXPORT
+    select-iterator-targets
+  DESTINATION
+    lib/cmake/select-iterator
+  NAMESPACE
+    gch::
+)
+
+if (GCH_SELECT_ITERATOR_BUILD_TESTS)
+  add_subdirectory (test)
+endif ()
