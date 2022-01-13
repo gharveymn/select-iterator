@@ -7,11 +7,19 @@
  * of the MIT license. See the LICENSE file for details.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SELECT_ITERATOR_HPP
-#define SELECT_ITERATOR_HPP
+#ifndef GCH_SELECT_ITERATOR_HPP
+#define GCH_SELECT_ITERATOR_HPP
+
+#ifdef __clang__
+#  if defined (__cplusplus) && __cplusplus >= 201703L
+#    ifndef GCH_CLANG_17
+#      define GCH_CLANG_17
+#    endif
+#  endif
+#endif
 
 #ifndef GCH_CPP14_CONSTEXPR
-#  if __cpp_constexpr >= 201304L
+#  if defined (__cpp_constexpr) && __cpp_constexpr >= 201304L
 #    define GCH_CPP14_CONSTEXPR constexpr
 #  else
 #    define GCH_CPP14_CONSTEXPR
@@ -19,20 +27,24 @@
 #endif
 
 #ifndef GCH_NODISCARD
-#  if __has_cpp_attribute(nodiscard) >= 201603L
-#    define GCH_NODISCARD [[nodiscard]]
+#  if defined (__has_cpp_attribute) && __has_cpp_attribute (nodiscard) >= 201603L
+#    if ! defined (__clang__) || defined (GCH_CLANG_17)
+#      define GCH_NODISCARD [[nodiscard]]
+#    else
+#      define GCH_NODISCARD
+#    endif
 #  else
 #    define GCH_NODISCARD
 #  endif
 #endif
 
-#if __cpp_impl_three_way_comparison >= 201907L
+#if defined (__cpp_impl_three_way_comparison) && __cpp_impl_three_way_comparison >= 201907L
 #  ifndef GCH_IMPL_THREE_WAY_COMPARISON
 #    define GCH_IMPL_THREE_WAY_COMPARISON
 #  endif
-#  if __has_include(<compare>)
+#  if defined (__has_include) && __has_include(<compare>)
 #    include <compare>
-#    if __cpp_lib_three_way_comparison >= 201907L
+#    if defined (__cpp_lib_three_way_comparison) && __cpp_lib_three_way_comparison >= 201907L
 #      ifndef GCH_LIB_THREE_WAY_COMPARISON
 #        define GCH_LIB_THREE_WAY_COMPARISON
 #      endif
@@ -40,14 +52,14 @@
 #  endif
 #endif
 
-#if __cpp_concepts >= 201907L
+#if defined (__cpp_concepts) && __cpp_concepts >= 201907L
 #  ifndef GCH_CONCEPTS
 #    define GCH_CONCEPTS
 #  endif
-#  if __has_include(<concepts>)
+#  if defined (__has_include) && __has_include (<concepts>)
 #    include <concepts>
-#    if __cpp_lib_concepts >= 202002L
-#      ifndef GCH_LIB_CONCEPTS
+#    if defined (__cpp_lib_concepts) && __cpp_lib_concepts >= 202002L
+#      if ! defined (GCH_LIB_CONCEPTS) && ! defined (GCH_DISABLE_CONCEPTS)
 #        define GCH_LIB_CONCEPTS
 #      endif
 #    endif
@@ -546,4 +558,4 @@ namespace gch
 
 }
 
-#endif // SELECT_ITERATOR_HPP
+#endif // GCH_SELECT_ITERATOR_HPP
