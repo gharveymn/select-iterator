@@ -11,7 +11,7 @@ project (
 string (COMPARE EQUAL "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" _EXTRAS_DEFAULT)
 
 option (
-  GCH_SELECT_ITERATOR_BUILD_TESTS
+  GCH_SELECT_ITERATOR_ENABLE_TESTS
   "Set to ON to build tests for gch::select-iterator."
   ${_EXTRAS_DEFAULT}
 )
@@ -25,7 +25,7 @@ cmake_dependent_option (
   OFF
 )
 
-if (GCH_SELECT_ITERATOR_BUILD_TESTS)
+if (GCH_SELECT_ITERATOR_ENABLE_TESTS)
   enable_testing ()
 endif ()
 

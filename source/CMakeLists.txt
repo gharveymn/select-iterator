@@ -65,6 +65,6 @@ install (
     gch::
 )
 
-if (GCH_SELECT_ITERATOR_BUILD_TESTS)
+if (GCH_SELECT_ITERATOR_ENABLE_TESTS)
   add_subdirectory (test)
 endif ()
